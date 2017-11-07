@@ -1,0 +1,26 @@
+
+
+
+// generate key pair
+keytool -genkeypair -alias mytestkey -keyalg RSA -dname "CN=Web Server,OU=Unit,O=Organization,L=City,S=State,C=US" -keypass changeme -keystore server.jks -storepass letmein
+
+// export public key
+keytool -v -export -file pubkey.cer -keystore server.jks -alias mytestkey
+
+keytool -import -alias mytestkey -file pubkey.cer -keystore pubkey.jks
+
+//export private key
+keytool -importkeystore -srckeystore server.jks -srcalias mytestkey -srcstorepass letmein -srckeypass changeme -destkeystore server.p12 -deststoretype PKCS12 -deststorepass changeme -destkeypass changeme
+
+openssl pkcs12 -in server.p12 -nocerts -out privatekey.pem
+
+openssl pkcs12 -in server.p12  -nodes -nocerts -out key.pem
+
+
+//test for decryption 
+openssl rsautl -decrypt -inkey privatekey.pem -in encrypted-value.txt -out key.bin
+
+
+//Resources
+https://patrickgrimard.io/2016/03/04/encrypting-and-decrypting-configuration-property-values-in-spring-cloud/
+https://cloud.spring.io/spring-cloud-config/single/spring-cloud-config.html
